@@ -17,7 +17,7 @@ const app = express()
 
 app.use(express.json())
 app.use(cors({
-     origin: "https://vamo-falar-front.vercel.app/register",
+     origin: "https://vamo-falar-front.vercel.app/",
         credentials: true,
         methods: ["GET", "POST"]
 }))
@@ -29,7 +29,7 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: "https://vamo-falar-front.vercel.app/register",
+        origin: "https://vamo-falar-front.vercel.app/",
         credentials: true,
         methods: ["GET", "POST"]
     }
