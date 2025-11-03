@@ -25,6 +25,10 @@ app.use('/auth', authRoutes)
 app.use('/users', userRoutes)
 app.use('/room', roomRoutes)
 
+app.get('/health', (req, res) =>{
+    res.status(200).json({status: "UP", service: 'Vamo falar backend'})
+})
+
 const server = http.createServer(app)
 
 const io = new Server(server, {
