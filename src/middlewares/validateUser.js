@@ -11,6 +11,6 @@ export const validateUser = (req, res, next) =>{
 export const checkRegistration = async (req, res, next) => {
     const {registration} = req.body
     const user = await User.findOne({registration})
-    if(user) return res.json({msg: "registration is already in use!"})
+    if(user) return res.status(400).json({msg: "Essa matricula já está em uso!"})
     next()
 }

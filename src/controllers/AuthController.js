@@ -14,6 +14,7 @@ export class AuthController {
                 password: hashedPassword, 
                 role: role || "user"
             })
+           
             await newUser.save()
             
             const token = createToken(newUser._id, newUser.name, newUser.registration, newUser.role)
