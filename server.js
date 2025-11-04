@@ -73,7 +73,7 @@ io.on("connection", (socket)=>{
         room,
         user: socket.user.name,
         text,
-        time: new Date().toLocaleTimeString()
+        time: new Date().toLocaleTimeString("pt-BR", { hour12: false })
     }
     const newMessage = new Message(messageData)
     await newMessage.save()
