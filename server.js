@@ -17,23 +17,23 @@ const app = express()
 
 app.use(express.json())
 app.use(cors({
-     origin: ["https://vamo-falar-front.vercel.app", "http://localhost:5173"],
-        credentials: true,
-        methods: ["GET", "POST"]
+    origin: ["https://vamo-falar-front.vercel.app", "http://localhost:5173"],
+    credentials: true,
+    methods: ["GET", "POST"]
 }))
-app.use('/auth', authRoutes)    
+app.use('/auth', authRoutes)
 app.use('/users', userRoutes)
 app.use('/room', roomRoutes)
 
-app.get('/health', (req, res) =>{
-    res.status(200).json({status: "UP", service: 'Vamo falar backend'})
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: "UP", service: 'Vamo falar backend' })
 })
 
 const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: ["https://vamo-falar-front.vercel.app","http://localhost:5173"],
+        origin: ["https://vamo-falar-front.vercel.app", "http://localhost:5173"],
         credentials: true,
         methods: ["GET", "POST"]
     }
@@ -41,9 +41,9 @@ const io = new Server(server, {
 
 const secret = process.env.JWT_SECRET
 
-io.use((socket, next) =>{
+io.use((socket, next) => {
     const token = socket.handshake.auth.token
-    if(!token) return next(new Error("Token ausente"))
+    if (!token) return next(new Error("Token ausente"))
     try {
         const decoded = jwt.verify(token, secret)
         socket.user = decoded
@@ -53,37 +53,42 @@ io.use((socket, next) =>{
     }
 })
 
-io.on("connection", (socket)=>{
+io.on("connection", (socket) => {
     console.log(`Usuario conectado: ${socket.user.name}`)
 
-    socket.on("joinRoom", async ({roomName, type = "group"}) =>{
-        let room = await Room.findOne({name: roomName})
-        if(!room){
-            room = new Room({name: roomName, type, members: [socket.user.registration]})
+    socket.on("joinRoom", async ({ roomName, type = "group" }) => {
+        let room = await Room.findOne({ name: roomName })
+        if (!room) {
+            room = new Room({ name: roomName, type, members: [socket.user.registration] })
             await room.save()
         }
 
         socket.join(roomName)
         console.log(`${socket.user.name} entrou na sala ${roomName}`)
-        const history = await Message.find({room: roomName}).sort({_id: 1})
+        const history = await Message.find({ room: roomName }).sort({ _id: 1 })
         socket.emit("roomHistory", history)
     })
-   socket.on("sendMessage", async ({room, text}) =>{
-     const messageData = {
-        room,
-        user: socket.user.name,
-        text,
-        time: new Date().toLocaleTimeString("pt-BR", { hour12: false })
-    }
-    const newMessage = new Message(messageData)
-    await newMessage.save()
+    socket.on("sendMessage", async ({ room, text }) => {
+        const messageData = {
+            room,
+            user: socket.user.name,
+            text,
+            time: new Date().toLocaleTimeString("pt-BR", {
+                timeZone: "America/Sao_Paulo",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            })
+        }
+        const newMessage = new Message(messageData)
+        await newMessage.save()
 
-    io.to(room).emit("newMessage", messageData)
-   })
+        io.to(room).emit("newMessage", messageData)
+    })
 
-   socket.on("disconnect", ()=>{
-    console.log(`Usuario saiu: ${socket.user.name}`)
-   })   
+    socket.on("disconnect", () => {
+        console.log(`Usuario saiu: ${socket.user.name}`)
+    })
 })
 server.listen(PORT, () => console.log("Rodando"))
 export default app
